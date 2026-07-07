@@ -2,7 +2,7 @@ import { useRef } from "react";
 import MagneticButton from "./MagneticButton";
 import ScanCard from "./ScanCard";
 
-export default function Hero({ onOpenAuth }) {
+export default function Hero({ onOpenAuth, user }) {
   const sectionRef = useRef(null);
 
   function handleMouseMove(e) {
@@ -32,7 +32,10 @@ export default function Hero({ onOpenAuth }) {
 
       <div className="relative max-w-[1200px] mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32 grid md:grid-cols-2 gap-14 items-center">
         <div>
-          
+          <span className="inline-flex items-center gap-2 font-mono text-[11px] tracking-widest text-scan border border-line rounded-full px-3 py-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-scan" />
+            BETA — 18 SPOTS
+          </span>
 
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.08] mt-6 text-ink">
             Your AI Career Copilot for Smarter Job Applications
@@ -45,15 +48,25 @@ export default function Hero({ onOpenAuth }) {
           </p>
 
           <div className="flex flex-wrap items-center gap-4 mt-9">
-            <MagneticButton onClick={() => onOpenAuth("signup")} className="btn-primary">
-              Get Started
-            </MagneticButton>
-            <MagneticButton onClick={() => onOpenAuth("login")} className="btn-ghost">
-              Log In
-            </MagneticButton>
+            {user ? (
+              <span className="font-mono text-sm text-scan">
+                Welcome back, {(user.displayName || user.email).split(" ")[0]}.
+              </span>
+            ) : (
+              <>
+                <MagneticButton onClick={() => onOpenAuth("signup")} className="btn-primary">
+                  Get Started
+                </MagneticButton>
+                <MagneticButton onClick={() => onOpenAuth("login")} className="btn-ghost">
+                  Log In
+                </MagneticButton>
+              </>
+            )}
           </div>
 
-          
+          <p className="font-mono text-xs text-ink-dim mt-6">
+            Currently accepting a limited group of beta users.
+          </p>
         </div>
 
         <div className="relative">

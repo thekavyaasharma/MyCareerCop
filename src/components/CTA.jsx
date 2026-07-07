@@ -1,7 +1,7 @@
 import Reveal from "./Reveal";
 import MagneticButton from "./MagneticButton";
 
-export default function CTA({ onOpenAuth }) {
+export default function CTA({ onOpenAuth, user }) {
   return (
     <section className="max-w-[1200px] mx-auto px-6 py-20 md:py-28">
       <Reveal>
@@ -18,14 +18,16 @@ export default function CTA({ onOpenAuth }) {
             better opportunities, strengthen your applications, and prepare
             for your next career move.
           </p>
-          <div className="relative flex flex-wrap items-center justify-center gap-4 mt-9">
-            <MagneticButton onClick={() => onOpenAuth("signup")} className="btn-primary">
-              Create Free Account
-            </MagneticButton>
-            <MagneticButton onClick={() => onOpenAuth("login")} className="btn-ghost">
-              Log In
-            </MagneticButton>
-          </div>
+          {!user && (
+            <div className="relative flex flex-wrap items-center justify-center gap-4 mt-9">
+              <MagneticButton onClick={() => onOpenAuth("signup")} className="btn-primary">
+                Create Free Account
+              </MagneticButton>
+              <MagneticButton onClick={() => onOpenAuth("login")} className="btn-ghost">
+                Log In
+              </MagneticButton>
+            </div>
+          )}
         </div>
       </Reveal>
     </section>

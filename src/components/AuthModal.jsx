@@ -1,8 +1,24 @@
 import { useEffect, useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+  sendPasswordResetEmail,
+  updateProfile,
+} from "firebase/auth";
+import { auth, googleProvider } from "../firebase";
+import { friendlyAuthError } from "../lib/authErrors";
 import MagneticButton from "./MagneticButton";
 
 export default function AuthModal({ mode, onClose, onSwitchMode }) {
   const [visible, setVisible] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [resetSent, setResetSent] = useState(false);
+
   const isSignup = mode === "signup";
 
   useEffect(() => {
@@ -18,6 +34,60 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
+  // Clear transient state whenever the mode is switched (signup <-> login)
+  useEffect(() => {
+    setError("");
+    setResetSent(false);
+  }, [mode]);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
+    try {
+      if (isSignup) {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        if (name.trim()) {
+          await updateProfile(cred.user, { displayName: name.trim() });
+        }
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+      onClose();
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleGoogle() {
+    setError("");
+    setSubmitting(true);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      onClose();
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleForgotPassword() {
+    setError("");
+    if (!email) {
+      setError("Enter your email above first, then tap \u201cForgot password?\u201d");
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setResetSent(true);
+    } catch (err) {
+      setError(friendlyAuthError(err));
+    }
+  }
 
   return (
     <div
@@ -56,35 +126,68 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
             : "Log in to see your latest matches."}
         </p>
 
-        <form className="mt-6 space-y-3" onSubmit={(e) => e.preventDefault()}>
+        {error && (
+          <div className="mt-4 text-sm text-signal bg-signal-dim border border-signal/30 rounded-lg px-3 py-2">
+            {error}
+          </div>
+        )}
+        {resetSent && (
+          <div className="mt-4 text-sm text-scan bg-scan/10 border border-scan/30 rounded-lg px-3 py-2">
+            Password reset email sent — check your inbox.
+          </div>
+        )}
+
+        <form className="mt-6 space-y-3" onSubmit={handleSubmit}>
           {isSignup && (
             <input
               type="text"
               placeholder="Full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full bg-void border border-line rounded-lg px-4 py-2.5 text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-signal/60"
             />
           )}
           <input
             type="email"
             placeholder="Email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             className="w-full bg-void border border-line rounded-lg px-4 py-2.5 text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-signal/60"
           />
           <input
             type="password"
             placeholder="Password"
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             className="w-full bg-void border border-line rounded-lg px-4 py-2.5 text-sm text-ink placeholder:text-ink-dim focus:outline-none focus:border-signal/60"
           />
 
           {!isSignup && (
             <div className="text-right">
-              <a href="#" data-cursor-hover className="text-xs text-ink-dim hover:text-ink">
+              <button
+                type="button"
+                data-cursor-hover
+                onClick={handleForgotPassword}
+                className="text-xs text-ink-dim hover:text-ink"
+              >
                 Forgot password?
-              </a>
+              </button>
             </div>
           )}
 
-          <MagneticButton type="submit" className="btn-primary w-full justify-center mt-2">
-            {isSignup ? "Create Free Account" : "Log In"}
+          <MagneticButton
+            type="submit"
+            disabled={submitting}
+            className="btn-primary w-full justify-center mt-2 disabled:opacity-60"
+          >
+            {submitting
+              ? "Please wait…"
+              : isSignup
+              ? "Create Free Account"
+              : "Log In"}
           </MagneticButton>
         </form>
 
@@ -95,8 +198,11 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
         </div>
 
         <button
+          type="button"
           data-cursor-hover
-          className="w-full btn-ghost justify-center flex items-center gap-2 text-sm"
+          onClick={handleGoogle}
+          disabled={submitting}
+          className="w-full btn-ghost justify-center flex items-center gap-2 text-sm disabled:opacity-60"
         >
           Continue with Google
         </button>
@@ -104,6 +210,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
         <p className="text-center text-xs text-ink-dim mt-6">
           {isSignup ? "Already have an account? " : "New to myCareerCop? "}
           <button
+            type="button"
             data-cursor-hover
             onClick={() => onSwitchMode(isSignup ? "login" : "signup")}
             className="text-ink hover:underline"

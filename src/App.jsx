@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "./hooks/useAuth";
 import Cursor from "./components/Cursor";
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -13,25 +14,26 @@ import AuthModal from "./components/AuthModal";
 
 export default function App() {
   const [authMode, setAuthMode] = useState(null); // null | "login" | "signup"
+  const { user, loading, logOut } = useAuth();
 
   return (
     <div className="bg-void min-h-screen">
       <Cursor />
-      <Navbar onOpenAuth={setAuthMode} />
+      <Navbar onOpenAuth={setAuthMode} user={user} authLoading={loading} onLogOut={logOut} />
 
       <main>
-        <Hero onOpenAuth={setAuthMode} />
+        <Hero onOpenAuth={setAuthMode} user={user} />
         <Welcome />
         <Features />
         <Audience />
         <HowItWorks />
         <WhyChoose />
-        <CTA onOpenAuth={setAuthMode} />
+        <CTA onOpenAuth={setAuthMode} user={user} />
       </main>
 
       <Footer />
 
-      {authMode && (
+      {authMode && !user && (
         <AuthModal
           mode={authMode}
           onClose={() => setAuthMode(null)}
