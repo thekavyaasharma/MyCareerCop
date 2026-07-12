@@ -9,7 +9,7 @@ export default function Footer() {
     <footer className="border-t border-line">
       <div className="max-w-[1200px] mx-auto px-6 py-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-10">
         <div>
-          <span className="font-display text-lg text-ink">myCareerCop</span>
+          <span className="font-display text-lg text-ink">MyCareerCop</span>
           <p className="text-ink-dim text-sm mt-3 max-w-[220px] leading-relaxed">
             Your AI copilot for smarter and more confident job applications.
           </p>
@@ -37,7 +37,7 @@ export default function Footer() {
         ))}
       </div>
 
-      <div className="border-t border-line">
+      <div >
         <p className="max-w-[1200px] mx-auto px-6 py-6 text-xs text-ink-dim font-mono">
           © {new Date().getFullYear()} MyCareerCop — Built by a job seeker, for job seekers!
         </p>

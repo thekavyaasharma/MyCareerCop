@@ -2,7 +2,7 @@ import Reveal from "./Reveal";
 
 const STEPS = [
   { n: "01", title: "Create your free account", desc: "Sign up in under a minute — no credit card required." },
-  { n: "02", title: "Upload your resume", desc: "PDF or DOCX. myCareerCop reads and structures it automatically." },
+  { n: "02", title: "Upload your resume", desc: "PDF or DOCX. MyCareerCop reads and structures it automatically." },
   { n: "03", title: "Let the AI analyze", desc: "We compare your profile against relevant, real job opportunities." },
   { n: "04", title: "Review & apply", desc: "Check your ATS score, optimize your resume, explore skill gaps, and apply with confidence." },
 ];

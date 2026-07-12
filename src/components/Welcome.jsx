@@ -5,15 +5,10 @@ export default function Welcome() {
     <section className="max-w-[820px] mx-auto px-6 py-20 md:py-28 text-center">
       <Reveal>
         <h2 className="font-display text-3xl md:text-4xl text-ink">
-          Welcome to MyCareerCop
+          Welcome to MyCareerCop!
         </h2>
       </Reveal>
-      <Reveal delay={100}>
-        <p className="text-ink-dim text-lg mt-6 leading-relaxed">
-          Finding the right job takes more than sending the same resume
-          everywhere.
-        </p>
-      </Reveal>
+      
       <Reveal delay={180}>
         <p className="text-ink-dim text-lg mt-4 leading-relaxed">
           MyCareerCop helps you understand how well your resume matches real

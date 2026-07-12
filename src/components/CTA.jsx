@@ -14,7 +14,7 @@ export default function CTA({ onOpenAuth, user }) {
             Ready to Improve Your Job Search?
           </h2>
           <p className="relative text-ink-dim mt-5 max-w-lg mx-auto leading-relaxed">
-            Upload your resume once and let myCareerCop help you discover
+            Upload your resume once and let MyCareerCop help you discover
             better opportunities, strengthen your applications, and prepare
             for your next career move.
           </p>

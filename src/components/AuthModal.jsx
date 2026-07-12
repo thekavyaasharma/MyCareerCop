@@ -208,7 +208,7 @@ export default function AuthModal({ mode, onClose, onSwitchMode }) {
         </button>
 
         <p className="text-center text-xs text-ink-dim mt-6">
-          {isSignup ? "Already have an account? " : "New to myCareerCop? "}
+          {isSignup ? "Already have an account? " : "New to MyCareerCop? "}
           <button
             type="button"
             data-cursor-hover

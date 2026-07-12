@@ -5,7 +5,7 @@ const FEATURES = [
   {
     icon: "upload",
     title: "Resume Parsing",
-    desc: "Upload your PDF or DOCX resume once. myCareerCop automatically extracts your skills, work experience, and education into a structured candidate profile.",
+    desc: "Upload your PDF or DOCX resume once. MyCareerCop automatically extracts your skills, work experience, and education into a structured candidate profile.",
   },
   {
     icon: "match",
@@ -20,7 +20,7 @@ const FEATURES = [
   {
     icon: "edit",
     title: "Resume Optimization",
-    desc: "When your resume is close to a great match, myCareerCop suggests improvements by reorganizing and highlighting your existing experience — without adding false information.",
+    desc: "When your resume is close to a great match, MyCareerCop suggests improvements by reorganizing and highlighting your existing experience — without adding false information.",
   },
   {
     icon: "target",

@@ -32,17 +32,14 @@ export default function Hero({ onOpenAuth, user }) {
 
       <div className="relative max-w-[1200px] mx-auto px-6 pt-16 pb-24 md:pt-24 md:pb-32 grid md:grid-cols-2 gap-14 items-center">
         <div>
-          <span className="inline-flex items-center gap-2 font-mono text-[11px] tracking-widest text-scan border border-line rounded-full px-3 py-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-scan" />
-            BETA — 18 SPOTS
-          </span>
+          
 
           <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.08] mt-6 text-ink">
             Your AI Career Copilot for Smarter Job Applications
           </h1>
 
           <p className="text-ink-dim text-base sm:text-lg mt-6 max-w-xl leading-relaxed">
-            Upload your resume once, and myCareerCop helps you discover relevant
+            Upload your resume once, and MyCareerCop helps you discover relevant
             jobs, understand your ATS match, improve your resume when needed,
             and identify skills that can strengthen your career.
           </p>
@@ -64,9 +61,7 @@ export default function Hero({ onOpenAuth, user }) {
             )}
           </div>
 
-          <p className="font-mono text-xs text-ink-dim mt-6">
-            Currently accepting a limited group of beta users.
-          </p>
+          
         </div>
 
         <div className="relative">

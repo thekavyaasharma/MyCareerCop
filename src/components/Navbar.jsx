@@ -16,7 +16,7 @@ export default function Navbar({ onOpenAuth, user, authLoading, onLogOut }) {
     <header className={`sticky top-0 z-50 transition-colors ${scrolled ? "nav-scrolled" : ""}`}>
       <div className="max-w-[1200px] mx-auto flex items-center justify-between px-6 py-4">
         <a href="#top" data-cursor-hover className="font-display text-xl text-ink">
-          myCareerCop
+          MyCareerCop
         </a>
 
         <nav className="hidden md:flex items-center gap-8 text-sm text-ink-dim">
@@ -24,7 +24,7 @@ export default function Navbar({ onOpenAuth, user, authLoading, onLogOut }) {
             Features
           </a>
           <a href="#how-it-works" data-cursor-hover className="hover:text-ink transition-colors">
-            How It Works
+            How It Works?
           </a>
         </nav>
 

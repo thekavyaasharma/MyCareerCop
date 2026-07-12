@@ -20,7 +20,7 @@ const AUDIENCE = [
   {
     icon: "users",
     title: "Anyone Looking for Better Job Matches",
-    desc: "Whether you're actively applying or exploring new opportunities, myCareerCop helps you make informed decisions.",
+    desc: "Whether you're actively applying or exploring new opportunities, MyCareerCop helps you make informed decisions.",
   },
 ];
 
