@@ -6,12 +6,11 @@ import {
   sendPasswordResetEmail,
   updateProfile,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db, googleProvider } from "../firebase";
+import { auth, googleProvider } from "../firebase";
 import { friendlyAuthError } from "../lib/authErrors";
 import MagneticButton from "./MagneticButton";
 
-export default function AuthModal({ mode, onClose, onSwitchMode, onNeedsProfile }) {
+export default function AuthModal({ mode, onClose, onSwitchMode }) {
   const [visible, setVisible] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -42,22 +41,6 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onNeedsProfile 
     setResetSent(false);
   }, [mode]);
 
-  // After any successful auth, decide whether to open the profile-setup
-  // flow (no Firestore profile yet) or just close the modal normally.
-  async function routeAfterAuth(uid) {
-    try {
-      const snap = await getDoc(doc(db, "users", uid));
-      if (!snap.exists() || !snap.data()?.profileComplete) {
-        onNeedsProfile?.();
-        return;
-      }
-    } catch (err) {
-      console.error("Profile lookup failed:", err);
-      // Fail safe: still let the user in rather than blocking them.
-    }
-    onClose();
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -68,11 +51,12 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onNeedsProfile 
         if (name.trim()) {
           await updateProfile(cred.user, { displayName: name.trim() });
         }
-        await routeAfterAuth(cred.user.uid);
       } else {
-        const cred = await signInWithEmailAndPassword(auth, email, password);
-        await routeAfterAuth(cred.user.uid);
+        await signInWithEmailAndPassword(auth, email, password);
       }
+      // App.jsx's live profile listener now decides what to show next
+      // (onboarding vs dashboard) — this modal's only job is to log in.
+      onClose();
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
@@ -84,8 +68,8 @@ export default function AuthModal({ mode, onClose, onSwitchMode, onNeedsProfile 
     setError("");
     setSubmitting(true);
     try {
-      const cred = await signInWithPopup(auth, googleProvider);
-      await routeAfterAuth(cred.user.uid);
+      await signInWithPopup(auth, googleProvider);
+      onClose();
     } catch (err) {
       setError(friendlyAuthError(err));
     } finally {
