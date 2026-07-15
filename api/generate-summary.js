@@ -17,6 +17,30 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const MAX_INPUT_CHARS = 20000; // guards against oversized/abusive payloads
 
+// Retries transient Gemini failures (503 overload, 429 rate limit)
+// with exponential backoff. Non-retryable errors fail immediately.
+async function generateWithRetry(params, maxRetries = 3) {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await ai.models.generateContent(params);
+    } catch (err) {
+      const status = err?.status || err?.error?.code;
+      const isRetryable = status === 503 || status === 429;
+      const isLastAttempt = attempt === maxRetries - 1;
+
+      console.warn(
+        `Gemini attempt ${attempt + 1} failed (status ${status}). ` +
+        (isRetryable && !isLastAttempt ? "Retrying..." : "Giving up.")
+      );
+
+      if (!isRetryable || isLastAttempt) throw err;
+
+      const delayMs = 1000 * Math.pow(2, attempt); // 1s, 2s, 4s
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
@@ -65,7 +89,7 @@ ${trimmedText}
 """`;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await generateWithRetry({
       model: "gemini-flash-latest",
       contents: prompt,
     });
@@ -78,6 +102,14 @@ ${trimmedText}
     return res.status(200).json({ summary, uid: decodedToken.uid });
   } catch (err) {
     console.error("Gemini generation error:", err);
-    return res.status(500).json({ error: "Failed to generate resume summary. Please try again." });
+
+    const status = err?.status || err?.error?.code;
+    const isOverloaded = status === 503 || status === 429;
+
+    return res.status(isOverloaded ? 503 : 500).json({
+      error: isOverloaded
+        ? "Our AI provider is experiencing high demand right now. Please try again in a moment."
+        : "Failed to generate resume summary. Please try again.",
+    });
   }
 }
