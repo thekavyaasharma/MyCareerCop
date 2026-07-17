@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BrowserRouter } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import { useUserProfile } from "./hooks/useUserProfile";
 import Cursor from "./components/Cursor";
@@ -13,7 +14,7 @@ import CTA from "./components/CTA";
 import Footer from "./components/Footer";
 import AuthModal from "./components/AuthModal";
 import ProfileSetupModal from "./components/ProfileSetupModal";
-import Dashboard from "./components/Dashboard";
+import DashboardLayout from "./components/DashboardLayout";
 
 export default function App() {
   const [authMode, setAuthMode] = useState(null); // null | "login" | "signup"
@@ -34,45 +35,44 @@ export default function App() {
     );
   }
 
-  // Logged in + fully onboarded → Dashboard, nothing else.
-  if (isReady) {
-    return (
-      <div className="bg-void min-h-screen">
-        <Cursor />
-        <Dashboard user={user} profile={profile} onLogOut={logOut} />
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-void min-h-screen">
-      <Cursor />
-      <Navbar onOpenAuth={setAuthMode} user={user} authLoading={authLoading} onLogOut={logOut} />
+    <BrowserRouter>
+      {isReady ? (
+        <div className="bg-void min-h-screen">
+          <Cursor />
+          <DashboardLayout user={user} profile={profile} onLogOut={logOut} />
+        </div>
+      ) : (
+        <div className="bg-void min-h-screen">
+          <Cursor />
+          <Navbar onOpenAuth={setAuthMode} user={user} authLoading={authLoading} onLogOut={logOut} />
 
-      <main>
-        <Hero onOpenAuth={setAuthMode} user={user} />
-        <Welcome />
-        <Features />
-        <Audience />
-        <HowItWorks />
-        <WhyChoose />
-        <CTA onOpenAuth={setAuthMode} user={user} />
-      </main>
+          <main>
+            <Hero onOpenAuth={setAuthMode} user={user} />
+            <Welcome />
+            <Features />
+            <Audience />
+            <HowItWorks />
+            <WhyChoose />
+            <CTA onOpenAuth={setAuthMode} user={user} />
+          </main>
 
-      <Footer />
+          <Footer />
 
-      {authMode && !user && (
-        <AuthModal
-          mode={authMode}
-          onClose={() => setAuthMode(null)}
-          onSwitchMode={setAuthMode}
-        />
+          {authMode && !user && (
+            <AuthModal
+              mode={authMode}
+              onClose={() => setAuthMode(null)}
+              onSwitchMode={setAuthMode}
+            />
+          )}
+
+          {/* Onboarding is now driven purely by profile state, not by
+              the login moment — so it reliably shows exactly once,
+              right after signup, and never again after that. */}
+          {needsOnboarding && <ProfileSetupModal onComplete={() => {}} />}
+        </div>
       )}
-
-      {/* Onboarding is now driven purely by profile state, not by
-          the login moment — so it reliably shows exactly once,
-          right after signup, and never again after that. */}
-      {needsOnboarding && <ProfileSetupModal onComplete={() => {}} />}
-    </div>
+    </BrowserRouter>
   );
 }
