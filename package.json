@@ -13,7 +13,7 @@
     "@google/genai": "^2.11.0",
     "@tailwindcss/vite": "^4.3.2",
     "firebase": "^12.15.0",
-    "firebase-admin": "^14.1.0",
+    "firebase-admin": "^14.2.0",
     "lucide-react": "^1.25.0",
     "mammoth": "^1.12.0",
     "pdfjs-dist": "^6.1.200",

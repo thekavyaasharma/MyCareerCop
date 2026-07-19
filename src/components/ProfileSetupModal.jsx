@@ -14,6 +14,54 @@ const DEGREES = [
 
 const PROFESSIONS = ["Student", "Fresher", "Working Professional"];
 
+// Grouped, constrained list of roles. Adding a role here is the ONLY way
+// it becomes selectable — keeps Adzuna search queries clean and valid.
+const TARGETED_ROLE_GROUPS = {
+  "Software & Engineering": [
+    "Software Engineer",
+    "Frontend Developer",
+    "Backend Developer",
+    "Full Stack Developer",
+    "Mobile App Developer",
+    "DevOps Engineer",
+    "Site Reliability Engineer",
+    "QA / Test Engineer",
+    "Cloud Engineer",
+    "Cybersecurity Analyst",
+    "Embedded Systems Engineer",
+  ],
+  "Data & AI": [
+    "Data Analyst",
+    "Data Engineer",
+    "Data Scientist",
+    "Machine Learning Engineer",
+    "Business Intelligence Analyst",
+  ],
+  "Core Engineering": [
+    "Mechanical Engineer",
+    "Civil Engineer",
+    "Electrical Engineer",
+    "Electronics Engineer",
+    "Chemical Engineer",
+  ],
+  "Business & Finance": [
+    "Business Analyst",
+    "Financial Analyst",
+    "Accountant",
+    "Product Manager",
+    "Operations Manager",
+    "Management Trainee",
+    "Sales Executive",
+    "HR Executive",
+  ],
+  "Design & Marketing": [
+    "UI/UX Designer",
+    "Graphic Designer",
+    "Content Writer",
+    "Digital Marketing Specialist",
+  ],
+};
+
 const STAGE_LABELS = {
   extracting: "Reading your resume…",
   summarizing: "Analyzing your resume with AI…",
@@ -67,8 +115,7 @@ export default function ProfileSetupModal({ onClose, onComplete }) {
     if (!cgpa || Number(cgpa) < 0 || Number(cgpa) > 10)
       return "Enter a valid CGPA between 0 and 10.";
     if (!profession) return "Select your current profession.";
-    if (!targetedRole.trim())
-      return "Enter one targeted role (e.g. \u201cSoftware Engineer\u201d).";
+    if (!targetedRole) return "Select a targeted role.";
     return "";
   }
 
@@ -149,7 +196,7 @@ export default function ProfileSetupModal({ onClose, onComplete }) {
           passingYear: Number(form.passingYear),
           cgpa: Number(form.cgpa),
           profession: form.profession,
-          targetedRole: form.targetedRole.trim(),
+          targetedRole: form.targetedRole,
           resumeFileName: resumeFile.name,
           resumeSummary: summary,
           profileComplete: true,
@@ -284,13 +331,20 @@ export default function ProfileSetupModal({ onClose, onComplete }) {
               ))}
             </select>
 
-            <input
-              type="text"
-              placeholder="Targeted role (e.g. Software Engineer)"
+            <select
               value={form.targetedRole}
               onChange={(e) => updateField("targetedRole", e.target.value)}
               className={inputClass}
-            />
+            >
+              <option value="" disabled>Targeted role</option>
+              {Object.entries(TARGETED_ROLE_GROUPS).map(([group, roles]) => (
+                <optgroup key={group} label={group}>
+                  {roles.map((role) => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
             <p className="text-xs text-ink-dim -mt-1">
               One role only \u2014 this is what our AI searches for on your behalf.
             </p>
