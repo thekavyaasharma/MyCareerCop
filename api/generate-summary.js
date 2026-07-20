@@ -17,14 +17,34 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 const MAX_INPUT_CHARS = 20000; // guards against oversized/abusive payloads
 
-// Retries transient Gemini failures (503 overload, 429 rate limit)
-// with exponential backoff. Non-retryable errors fail immediately.
+// Gemini's free tier returns 429 for two very different situations:
+//  - a genuine per-minute rate limit (transient, worth retrying)
+//  - the PER-DAY quota being fully exhausted (retrying is pointless —
+//    it won't reset for hours, so we should fail fast with a clear message)
+// The daily-quota violation always carries a quotaId containing "PerDay"
+// (e.g. "GenerateRequestsPerDayPerProjectPerModel-FreeTier").
+function isDailyQuotaError(err) {
+  const text = err?.message || JSON.stringify(err?.error || err || "");
+  return typeof text === "string" && text.includes("PerDay");
+}
+
+// Retries transient Gemini failures (503 overload, 429 per-minute rate limit)
+// with exponential backoff. Daily quota exhaustion and other non-retryable
+// errors fail immediately.
 async function generateWithRetry(params, maxRetries = 3) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await ai.models.generateContent(params);
     } catch (err) {
       const status = err?.status || err?.error?.code;
+
+      if (status === 429 && isDailyQuotaError(err)) {
+        console.warn("Gemini daily quota exhausted — failing fast, no point retrying.");
+        const quotaErr = new Error("Gemini daily free-tier quota exhausted.");
+        quotaErr.isDailyQuota = true;
+        throw quotaErr;
+      }
+
       const isRetryable = status === 503 || status === 429;
       const isLastAttempt = attempt === maxRetries - 1;
 
@@ -102,6 +122,13 @@ ${trimmedText}
     return res.status(200).json({ summary, uid: decodedToken.uid });
   } catch (err) {
     console.error("Gemini generation error:", err);
+
+    if (err.isDailyQuota) {
+      return res.status(429).json({
+        error:
+          "The AI service has hit its daily free-quota limit. Please try again later today, or contact support if this keeps happening.",
+      });
+    }
 
     const status = err?.status || err?.error?.code;
     const isOverloaded = status === 503 || status === 429;
