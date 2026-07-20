@@ -207,7 +207,7 @@ export default function ProfileSetupModal({ onClose, onComplete }) {
       );
 
       onComplete?.();
-      onClose();
+      onClose?.();
     } catch (err) {
       console.error("Profile setup error:", err);
       setError(err.message || "Something went wrong. Please try again.");
@@ -235,6 +235,16 @@ export default function ProfileSetupModal({ onClose, onComplete }) {
           visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
       >
+        <button
+          onClick={onClose}
+          data-cursor-hover
+          aria-label="Close"
+          disabled={submitting}
+          className="absolute top-4 right-4 text-ink-dim hover:text-ink transition-colors disabled:opacity-40 disabled:pointer-events-none"
+        >
+          ✕
+        </button>
+
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs text-ink-dim">Step {step} of 2</span>
           <div className="flex-1 h-1 bg-line rounded-full overflow-hidden ml-2">

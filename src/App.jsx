@@ -69,8 +69,13 @@ export default function App() {
 
           {/* Onboarding is now driven purely by profile state, not by
               the login moment — so it reliably shows exactly once,
-              right after signup, and never again after that. */}
-          {needsOnboarding && <ProfileSetupModal onComplete={() => {}} />}
+              right after signup, and never again after that.
+              Closing/cancelling mid-setup logs the user out, since
+              there's no partial-profile browsing mode yet — the account
+              exists but stays incomplete until they finish this flow. */}
+          {needsOnboarding && (
+            <ProfileSetupModal onComplete={() => {}} onClose={logOut} />
+          )}
         </div>
       )}
     </BrowserRouter>

@@ -7,7 +7,11 @@ import Profile from "./Profile";
 
 export default function DashboardLayout({ user, profile, onLogOut }) {
   return (
-    <div className="flex min-h-screen">
+    // h-screen (not min-h-screen) gives this row a fixed, bounded height.
+    // Without that bound, <main>'s overflow-y-auto has nothing to scroll
+    // *within* — the whole page scrolls instead, dragging the sidebar
+    // (and its logout button) down with it.
+    <div className="flex h-screen overflow-hidden">
       <Sidebar onLogOut={onLogOut} profile={profile} />
       <main className="flex-1 overflow-y-auto">
         <Routes>
