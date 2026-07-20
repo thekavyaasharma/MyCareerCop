@@ -23,13 +23,34 @@ const ADZUNA_APP_KEY = process.env.ADZUNA_APP_KEY;
 const ADZUNA_COUNTRY = process.env.ADZUNA_COUNTRY || "in"; // e.g. "in", "us", "gb"
 const MAX_JOBS = 5;
 
-// --- Retry helper (same pattern as generate-summary.js) ---------------
+// Gemini's free tier returns 429 for two very different situations:
+//  - a genuine per-minute rate limit (transient, worth retrying)
+//  - the PER-DAY quota being fully exhausted (retrying is pointless —
+//    it won't reset for hours, so we should fail fast with a clear message)
+// The daily-quota violation always carries a quotaId containing "PerDay"
+// (e.g. "GenerateRequestsPerDayPerProjectPerModel-FreeTier").
+function isDailyQuotaError(err) {
+  const text = err?.message || JSON.stringify(err?.error || err || "");
+  return typeof text === "string" && text.includes("PerDay");
+}
+
+// Retries transient Gemini failures (503 overload, 429 per-minute rate limit)
+// with exponential backoff. Daily quota exhaustion and other non-retryable
+// errors fail immediately.
 async function generateWithRetry(params, maxRetries = 3) {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await ai.models.generateContent(params);
     } catch (err) {
       const status = err?.status || err?.error?.code;
+
+      if (status === 429 && isDailyQuotaError(err)) {
+        console.warn("Gemini daily quota exhausted — failing fast, no point retrying.");
+        const quotaErr = new Error("Gemini daily free-tier quota exhausted.");
+        quotaErr.isDailyQuota = true;
+        throw quotaErr;
+      }
+
       const isRetryable = status === 503 || status === 429;
       const isLastAttempt = attempt === maxRetries - 1;
 
@@ -329,6 +350,14 @@ export default async function handler(req, res) {
     return res.status(200).json({ jobs: finalJobs, cached: false });
   } catch (err) {
     console.error("Opportunities pipeline error:", err);
+
+    if (err.isDailyQuota) {
+      return res.status(429).json({
+        error:
+          "The AI service has hit its daily free-quota limit. Please try again later today.",
+      });
+    }
+
     return res.status(500).json({
       error: "Failed to load opportunities. Please try again.",
     });
