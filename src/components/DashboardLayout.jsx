@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "./SideBar";
 import Dashboard from "./Dashboard";
 import Opportunities from "./Opportunities";
 import SkillUp from "./SkillUp";
