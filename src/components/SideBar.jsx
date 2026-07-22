@@ -8,11 +8,13 @@ import {
   LogOut,
   ChevronsLeft,
   ChevronsRight,
+  Send,
 } from "lucide-react";
 
 const NAV_ITEMS = [
   { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/opportunities", label: "Opportunities", icon: Briefcase },
+  { path: "/applications", label: "Applications", icon: Send },
   { path: "/skillup", label: "SkillUp", icon: GraduationCap },
   { path: "/profile", label: "Profile", icon: User },
 ];
