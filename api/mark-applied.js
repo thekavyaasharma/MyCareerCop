@@ -74,6 +74,25 @@ export default async function handler(req, res) {
       .doc(uid)
       .update({ appliedJobsCount: FieldValue.increment(1) });
 
+    // Permanent record, separate from the daily opportunities cache.
+    // That cache gets fully overwritten every ~24h when jobs are
+    // re-fetched, so without this, "applied" history would silently
+    // disappear the moment a job rotates out of the day's results.
+    const appliedRecord = {
+      jobId,
+      title: jobs[idx].title,
+      company: jobs[idx].company,
+      location: jobs[idx].location,
+      url: jobs[idx].url || null,
+      score: jobs[idx].score,
+      appliedAt: new Date().toISOString(),
+    };
+
+    await db
+      .collection("applications")
+      .doc(uid)
+      .set({ jobs: FieldValue.arrayUnion(appliedRecord) }, { merge: true });
+
     return res.status(200).json({ jobs });
   } catch (err) {
     console.error("mark-applied error:", err);
