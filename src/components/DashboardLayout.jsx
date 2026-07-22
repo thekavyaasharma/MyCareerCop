@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Sidebar from "./SideBar";
 import Dashboard from "./Dashboard";
 import Opportunities from "./Opportunities";
+import Applications from "./Applications";
 import SkillUp from "./SkillUp";
 import Profile from "./Profile";
 
@@ -17,6 +18,7 @@ export default function DashboardLayout({ user, profile, onLogOut }) {
         <Routes>
           <Route path="/dashboard" element={<Dashboard user={user} profile={profile} />} />
           <Route path="/opportunities" element={<Opportunities user={user} profile={profile} />} />
+          <Route path="/applications" element={<Applications user={user} profile={profile} />} />
           <Route path="/skillup" element={<SkillUp user={user} profile={profile} />} />
           <Route path="/profile" element={<Profile user={user} profile={profile} />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
