@@ -9,6 +9,7 @@ import {
   RefreshCw,
   AlertCircle,
   CircleCheck,
+  X,
 } from "lucide-react";
 import { auth } from "../firebase";
 import ScoreReadout from "./ScoreReadout";
@@ -104,7 +105,7 @@ function ActionPanel({ job, onOpen }) {
   );
 }
 
-function JobCard({ job, onMarkApplied, onMarkOpened }) {
+function JobCard({ job, onMarkApplied, onMarkOpened, onMarkNotInterested }) {
   return (
     <div className="bg-surface border border-line rounded-2xl p-6">
       <div className="flex items-start justify-between gap-4 mb-3">
@@ -148,7 +149,15 @@ function JobCard({ job, onMarkApplied, onMarkOpened }) {
 
       <ActionPanel job={job} onOpen={() => onMarkOpened(job.jobId)} />
 
-      <div className="mt-4 pt-4 border-t border-line flex justify-end">
+      <div className="mt-4 pt-4 border-t border-line flex items-center justify-end gap-2">
+        {!job.applied && (
+          <button
+            onClick={() => onMarkNotInterested(job.jobId)}
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-dim border border-line rounded-lg px-3 py-1.5 hover:text-red-600 hover:border-red-200 transition-colors"
+          >
+            <X size={13} /> Not interested
+          </button>
+        )}
         {job.applied ? (
           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-lg px-3 py-1.5">
             <CircleCheck size={13} /> Applied
@@ -214,6 +223,23 @@ export default function Opportunities({ profile }) {
       method: "POST",
       body: JSON.stringify({ jobId }),
     }).catch((err) => console.error("Failed to record job open:", err));
+  }
+
+  async function markNotInterested(jobId) {
+    // Snapshot so we can fully restore the list if the server call fails
+    // — unlike applied/opened (single-field toggles), removal can't be
+    // rolled back by just flipping a flag back.
+    const previousJobs = jobs;
+    setJobs((prev) => prev.filter((j) => j.jobId !== jobId));
+    try {
+      await authFetch("/api/mark-not-interested", {
+        method: "POST",
+        body: JSON.stringify({ jobId }),
+      });
+    } catch (err) {
+      console.error("Failed to remove job:", err);
+      setJobs(previousJobs);
+    }
   }
 
   if (state === "incomplete") {
@@ -292,6 +318,7 @@ export default function Opportunities({ profile }) {
               job={job}
               onMarkApplied={markApplied}
               onMarkOpened={markOpened}
+              onMarkNotInterested={markNotInterested}
             />
           ))}
         </div>

@@ -1,6 +1,28 @@
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
 import { Briefcase, Send, TrendingUp, Target, Sparkles, CircleCheck, ArrowRight, Clock } from "lucide-react";
+import { db } from "../firebase";
+import ApplicationHeatmap from "./ApplicationHeatmap";
 
 export default function Dashboard({ user, profile }) {
+  const [applications, setApplications] = useState([]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    async function loadApplications() {
+      try {
+        const snap = await getDoc(doc(db, "applications", user.uid));
+        setApplications(snap.exists() ? snap.data().jobs || [] : []);
+      } catch (err) {
+        console.error("Failed to load applications for heatmap:", err);
+        setApplications([]);
+      }
+    }
+
+    loadApplications();
+  }, [user?.uid]);
+
   const openedJobsCount = profile?.openedJobsCount ?? 0;
   const appliedJobsCount = profile?.appliedJobsCount ?? 0;
   const conversionRate =
@@ -72,6 +94,11 @@ export default function Dashboard({ user, profile }) {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Application activity heatmap */}
+      <div className="mb-6">
+        <ApplicationHeatmap applications={applications} />
       </div>
 
       {/* Main content */}
