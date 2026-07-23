@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
-import { Briefcase, Send, TrendingUp, Target, Sparkles, CircleCheck, ArrowRight, Clock } from "lucide-react";
+import { Briefcase, Send, TrendingUp, Target, Sparkles, CircleCheck, ArrowRight, Clock, ChevronDown } from "lucide-react";
 import { db } from "../firebase";
 import ApplicationHeatmap from "./ApplicationHeatmap";
 
 export default function Dashboard({ user, profile }) {
   const [applications, setApplications] = useState([]);
+  const [summaryExpanded, setSummaryExpanded] = useState(false);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -123,10 +124,28 @@ export default function Dashboard({ user, profile }) {
               {hasSummary ? "Ready" : "Pending"}
             </span>
           </div>
-          <p className="text-ink-dim text-sm whitespace-pre-wrap leading-relaxed">
+          <p
+            className={`text-ink-dim text-sm whitespace-pre-wrap leading-relaxed ${
+              summaryExpanded ? "" : "line-clamp-4"
+            }`}
+          >
             {profile?.resumeSummary ||
               "Upload your resume to generate an AI-powered summary of your experience, skills, and strengths."}
           </p>
+          {hasSummary && (
+            <button
+              onClick={() => setSummaryExpanded((v) => !v)}
+              className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 mt-2"
+            >
+              {summaryExpanded ? "Show less" : "More"}
+              <ChevronDown
+                size={13}
+                className={`transition-transform duration-200 ${
+                  summaryExpanded ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+          )}
         </div>
 
         {/* Side column */}
