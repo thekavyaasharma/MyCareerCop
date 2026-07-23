@@ -273,7 +273,7 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "User profile not found." });
     }
     const user = userSnap.data();
-    const { targetedRole, resumeSummary, email, fullName } = user;
+    const { targetedRole, resumeSummary, email, fullName, dismissedJobIds } = user;
 
     if (!targetedRole || !resumeSummary) {
       return res.status(400).json({
@@ -282,7 +282,10 @@ export default async function handler(req, res) {
     }
 
     // 4. Fetch jobs
-    const jobs = await fetchJobs(targetedRole);
+    const fetchedJobs = await fetchJobs(targetedRole);
+    const dismissedSet = new Set(dismissedJobIds || []);
+    const jobs = fetchedJobs.filter((j) => !dismissedSet.has(j.jobId));
+
     if (jobs.length === 0) {
       await oppRef.set({ jobs: [], lastFetchedAt: new Date() });
       return res.status(200).json({ jobs: [], cached: false });
